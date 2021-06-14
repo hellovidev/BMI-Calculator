@@ -15,47 +15,30 @@ class ViewController: UIViewController {
     @IBOutlet weak var heightSlider: UISlider!
     @IBOutlet weak var weightSlider: UISlider!
     
+    private var calculatorBrain: CalculatorBrain = CalculatorBrain()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
     }
     
     @IBAction func heightValueChanged(_ sender: UISlider) {
-        heightValueLabel.text = "\(valueRound(sender.value, precision: .hundredths))m"
+        heightValueLabel.text = "\(String(format: "%.2f", sender.value))m"
     }
     
     @IBAction func weightValueChanged(_ sender: UISlider) {
         weightValueLabel.text = "\(String(format: "%.0f", sender.value))Kg"
     }
     
-    // Specify the decimal place to round to using an enum
-    public enum RoundingPrecision {
-        case ones
-        case tenths
-        case hundredths
+    @IBAction func calculateClicked(_ sender: UIButton) {
+        calculatorBrain.calculateBMI(height: heightSlider.value, weight: weightSlider.value)
+        self.performSegue(withIdentifier: "goToResult", sender: self)
     }
     
-    // Round to the specific decimal place
-    public func valueRound(_ value: Float, precision: RoundingPrecision = .ones) -> Float {
-        switch precision {
-        case .ones:
-            return round(value)
-        case .tenths:
-            return round(value * 10) / 10.0
-        case .hundredths:
-            return round(value * 100) / 100.0
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        if segue.identifier == "goToResult" {
+            let destinationVC = segue.destination as! ResultViewController
+            destinationVC.bmiValue = "\(calculatorBrain.getBMIValue())"
         }
     }
     
-    @IBAction func calculateClicked(_ sender: UIButton) {
-        let height = heightSlider.value
-        let weight = weightSlider.value
-        let bmi = weight / pow(height, 2)
-        
-        let secondVC = SecondViewController()
-        secondVC.bmiValue = String(format: "%0.1f", bmi)
-        self.present(secondVC, animated: true, completion: nil)
-        
-    }
 }
-
